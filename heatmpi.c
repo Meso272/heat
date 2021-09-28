@@ -171,11 +171,13 @@ double doWork(int numprocs, int rank, int nbLines, int M, double *g,
             }
         }
     }
+    /*
     if (rank == (numprocs-1)) {
         for (j = 0; j < M; j++) {
             g[((nbLines-1)*M)+j] = g[((nbLines-2)*M)+j];
         }
     }
+    */
     return localerror;
 }
 
