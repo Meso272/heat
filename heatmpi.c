@@ -225,10 +225,10 @@ int main(int argc, char *argv[]) {
     FTI_Protect(1, h, M*nbLines, FTI_DBLE);
     FTI_Protect(2, g, M*nbLines, FTI_DBLE);
     */
-    /*
+    
     MPI_Barrier(MPI_COMM_WORLD);
     wtime = MPI_Wtime();
-    
+    /*
     for (i = 0; i < ITER_TIMES; i++) {
         //int checkpointed = FTI_Snapshot();
         localerror = doWork(nbProcs, rank, N, M, g, h);
@@ -250,13 +250,14 @@ int main(int argc, char *argv[]) {
             break;
         }
         
+        
     }
-
+    */
     if (rank == 0) {
         printf("Execution finished in %lf seconds with %d iterations.\n", MPI_Wtime() - wtime,i);
     }
     
-    */
+    
     //FTI_Finalize();
     if(rank==1){
         char filename[100];
