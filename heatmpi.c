@@ -211,7 +211,7 @@ int main(int argc, char *argv[]) {
     
     int end=(rank+1)*N/nbProcs-1;
     int nbLines=end-start+1;
-   
+    
     if (rank>0){
         nbLines++;
 
@@ -222,6 +222,7 @@ int main(int argc, char *argv[]) {
         
     }
 
+
    
     
     
@@ -229,8 +230,8 @@ int main(int argc, char *argv[]) {
    
     h = (double *) malloc(sizeof(double) * nbLines * M);
     g = (double *) malloc(sizeof(double) * nbLines *M);
-    initData(nbProcs,N,M,rank, g);
-    //initData(nbProcs,N,M,rank, h);
+    initData(nbProcs,nbLines,M,rank, g);
+    //initData(nbProcs,nbLines,M,rank, h);
   
     
     memSize = N * M * 3 * sizeof(double) / (double)(1024 * 1024);
