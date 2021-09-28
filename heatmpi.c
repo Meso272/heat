@@ -69,17 +69,18 @@ void writeDoubleData_inBytes(double *data, size_t nbEle, char* tgtFilePath, int 
     *status = state;
 }
 
-void initData(int nbLines, int M, int rank, double *h) {
-    if (rank!=0)
-        return;
+void initData(int nbProcs,int nbLines, int M, int rank, double *h) {
+    
     int i, j;
     for (i = 0; i < nbLines; i++) {
         for (j = 0; j < M; j++) {
-            h[(i*M)+j] = 25.0;
-            if(j==0)
-                h[(i*M)+j] = 1000.0;
-            if(i==0||i==nbLines-1||j==M-1)
+            if((i==0&&rank==0)||(i==nbLines-1&&rank==nbProcs-1)||j==M-1)
                 h[(i*M)+j] = 0.0;
+            else if(j==0)
+                h[(i*M)+j] = 1000.0;
+            else
+                h[(i*M)+j] = 25.0;
+            
 
         }
 
@@ -126,22 +127,22 @@ void print_solution (char *filename, double *u, int size)
 double doWork(int numprocs, int rank, int nbLines, int M, double *g,
  double *h) {
     int i, j;
-    //MPI_Request req1[2], req2[2];
-    //MPI_Status status1[2], status2[2];
+    MPI_Request req1[2], req2[2];
+    MPI_Status status1[2], status2[2];
     double localerror;
     localerror = 0;
     
     int total_lines=nbLines-2;
-    int start=rank*total_lines/numprocs+1;
+    //int start=rank*total_lines/numprocs+1;
     //printf("start:%d\n,rank:%d\n",start,rank);
-    int end=(rank+1)*total_lines/numprocs;
+    //int end=(rank+1)*total_lines/numprocs;
     //printf("end:%d\n,rank:%d\n",end,rank);
-    for (i = start; i <= end; i++) {
-        for (j = 1; j < M-1; j++) {
+    for (i = 0; i < nbLines; i++) {
+        for (j = 0; j < M; j++) {
             h[(i*M)+j] = g[(i*M)+j];
         }
     }
-    /*
+    
     if (rank > 0) {
         MPI_Isend(g+M, M, MPI_DOUBLE, rank-1, WORKTAG,
          MPI_COMM_WORLD, &req1[0]);
@@ -160,9 +161,9 @@ double doWork(int numprocs, int rank, int nbLines, int M, double *g,
     if (rank < numprocs-1) {
         MPI_Waitall(2, req2, status2);
     }
-    */
+    
     MPI_Barrier(MPI_COMM_WORLD);
-    for (i = start; i <=end; i++) {
+    for (i = 1; i <nbLines-1; i++) {
         for (j = 1; j < M-1; j++) {
             g[(i*M)+j] = 0.25*(h[((i-1)*M)+j]+h[((i+1)*M)+j]+
                 h[(i*M)+j-1]+h[(i*M)+j+1]);
@@ -206,25 +207,40 @@ int main(int argc, char *argv[]) {
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     
 
+    int start=rank*N/nbProcs;
     
-    
-    
-    
-    if(rank==0){
-        h = (double *) malloc(sizeof(double) * N * M);
-        g = (double *) malloc(sizeof(double) * N *M);
-        initData(N,M,rank, g);
-        initData(N,M,rank, h);
-    }
-    MPI_Bcast(&g,sizeof(double*),MPI_BYTE,0,MPI_COMM_WORLD);
-    MPI_Bcast(&h,sizeof(double*),MPI_BYTE,0,MPI_COMM_WORLD);
-    memSize = N * M * 2 * sizeof(double) / (double)(1024 * 1024);
+    int end=(rank+1)*N/nbProcs-1;
+    int nbLines=end-start+1;
+   
+    if (rank>0){
+        nbLines++;
 
+    }
+
+    if (rank<nbProcs-1){
+        nbLines++;
+        
+    }
+
+   
+    
+    
+    
+   
+    h = (double *) malloc(sizeof(double) * nbLines * M);
+    g = (double *) malloc(sizeof(double) * nbLines *M);
+    initData(nbProcs,N,M,rank, g);
+    //initData(nbProcs,N,M,rank, h);
+  
+    
+    memSize = N * M * 3 * sizeof(double) / (double)(1024 * 1024);
+    double * result;
     if (rank == 0) {
         printf("Local data size is %d x %d = %f MB.\n", N,
          M, memSize);
         printf("Target precision : %f \n", PRECISION);
         printf("Maximum number of iterations : %d \n", ITER_TIMES);
+        result= (double *) malloc(sizeof(double) * N * M);
     }
     /*
     FTI_Protect(0, &i, 1, FTI_INTG);
@@ -232,20 +248,54 @@ int main(int argc, char *argv[]) {
     FTI_Protect(2, g, M*nbLines, FTI_DBLE);
     */
     
-    MPI_Barrier(MPI_COMM_WORLD);
+    //MPI_Barrier(MPI_COMM_WORLD);
     
     wtime = MPI_Wtime();
-    /*
+    
     for (i = 0; i < ITER_TIMES; i++) {
         //int checkpointed = FTI_Snapshot();
         localerror = doWork(nbProcs, rank, N, M, g, h);
         
-        if ( (save_interval>0)&&((i%save_interval) == 0) && (rank == 0)) {
-            printf("Step : %d, error = %f\n", i, globalerror);
-            char filename[100];
-            sprintf(filename,"%s/%d.dat",outfolder,i);
-            int status=-1;
-            writeDoubleData_inBytes(g, N*M, filename, &status);
+        if ( (save_interval>0)&&((i%save_interval) == 0) ) {
+            MPI_Request sreq;
+            MPI_Status rstatus[100];
+            
+            if(rank>0){
+                int linesnum=nbLines-2;
+                if (rank==nbProcs-1)
+                    linesnum++;
+                MPI_Isend(g+M,linesnum*M,MPI_DOUBLE, 0, WORKTAG,
+         MPI_COMM_WORLD, &sreq);
+            }
+            if(rank==0){
+                for(i=0;i<end;i++){
+                    for(j=0;j<M;j++){
+                        result[i*M+j]=g[i*M+j];
+                    }
+                }
+                int pid;
+                for(pid=1;pid<nbProcs;pid++){
+                    int pid_start=pid*N/nbProcs;
+                    int pid_end=(pid+1)*N/nbProcs-1;
+                    MPI_Irecv(result+pid_start*M, (pid_end-pid_start+1)*M, MPI_DOUBLE, pid, WORKTAG,
+         MPI_COMM_WORLD, &rstatus[pid]);
+
+                }
+            }
+            MPI_Barrier(MPI_COMM_WORLD);
+
+            if(rank==0){
+                printf("Step : %d, error = %f\n", i, globalerror);
+                char filename[100];
+                sprintf(filename,"%s/%d.dat",outfolder,i);
+
+                    
+    
+
+
+                int status=-1;
+                writeDoubleData_inBytes(result, N*M, filename, &status);
+            }
         }
         MPI_Barrier(MPI_COMM_WORLD);
         if ((i%REDUCE) == 0) {
@@ -260,24 +310,48 @@ int main(int argc, char *argv[]) {
         
         
     }
-    */
+    
     if (rank == 0) {
         printf("Execution finished in %lf seconds with %d iterations.\n", MPI_Wtime() - wtime,i);
     }
     
     
     //FTI_Finalize();
-    if(rank==1){
-        char filename[100];
-        sprintf(filename,"%s/%d.dat",outfolder,i);
+    MPI_Request sreq;
+    MPI_Status rstatus[100];
+            
+    if(rank>0){
+        int linesnum=nbLines-2;
+        if (rank==nbProcs-1)
+            linesnum++;
+        MPI_Isend(g+M,linesnum*M,MPI_DOUBLE, 0, WORKTAG,
+    MPI_COMM_WORLD, &sreq);
+    }
+    if(rank==0){
+        for(i=0;i<end;i++){
+            for(j=0;j<M;j++){
+                result[i*M+j]=g[i*M+j];
+            }
+        }
+        int pid;
+        for(pid=1;pid<nbProcs;pid++){
+            int pid_start=pid*N/nbProcs;
+            int pid_end=(pid+1)*N/nbProcs-1;
+            MPI_Irecv(result+pid_start*M, (pid_end-pid_start+1)*M, MPI_DOUBLE, pid, WORKTAG,MPI_COMM_WORLD, &rstatus[pid]);
 
-        int status=-1;
-        printf("%f\n",g[200]);
-        writeDoubleData_inBytes(g, N*M, filename, &status);
-        free(h);
-        free(g);
+        }
     }
     MPI_Barrier(MPI_COMM_WORLD);
+
+    if(rank==0){
+        char filename[100];
+        sprintf(filename,"%s/%d.dat",outfolder,i);
+        int status=-1;
+        writeDoubleData_inBytes(result, N*M, filename, &status);
+        free(result);
+    }
+    free(g);
+    free(h);
     MPI_Finalize();
     
     return 0;
