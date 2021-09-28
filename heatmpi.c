@@ -343,7 +343,7 @@ int main(int argc, char *argv[]) {
         for(pid=1;pid<nbProcs;pid++){
             int pid_start=pid*N/nbProcs;
             int pid_end=(pid+1)*N/nbProcs-1;
-            printf("mama%d\n",%pid);
+            printf("mama%d\n",pid);
             MPI_Irecv(result+pid_start*M, (pid_end-pid_start+1)*M, MPI_DOUBLE, pid, WORKTAG,MPI_COMM_WORLD, &rreq[pid]);
             
 
