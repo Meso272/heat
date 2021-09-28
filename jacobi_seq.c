@@ -97,13 +97,14 @@ int main (int argc, char *argv[])
    writeDoubleData_inBytes(result, M*N, filename, &status);
    free(result);
    int i;
+   /*
    for(i=0;i<M;i++){
        free(u[i]);
        free(w[i]);
    }
    free(u);
    free(w);
-   
+   */
    return 0;
 }
 
