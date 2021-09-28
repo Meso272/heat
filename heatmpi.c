@@ -257,7 +257,7 @@ int main(int argc, char *argv[]) {
     
 
     //FTI_Finalize();
-    if(rank==0){
+    if(rank==1){
         char filename[100];
         sprintf(filename,"%s/%d.dat",outfolder,i);
         int status=-1;
