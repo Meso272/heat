@@ -20,6 +20,13 @@
 //#define ITER_OUT    1000
 #define WORKTAG     50
 #define REDUCE      5
+typedef union ldouble
+{
+    double value;
+    unsigned long lvalue;
+    unsigned char byte[8];
+} ldouble;
+
 void writeByteData(unsigned char *bytes, size_t byteLength, char *tgtFilePath, int *status)
 {
     FILE *pFile = fopen(tgtFilePath, "wb");

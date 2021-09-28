@@ -216,6 +216,13 @@ int find_steady_state (double **u, double **w)
    return its;
 }
 
+typedef union ldouble
+{
+    double value;
+    unsigned long lvalue;
+    unsigned char byte[8];
+} ldouble;
+
 void writeByteData(unsigned char *bytes, size_t byteLength, char *tgtFilePath, int *status)
 {
     FILE *pFile = fopen(tgtFilePath, "wb");
