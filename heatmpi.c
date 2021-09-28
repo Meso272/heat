@@ -216,7 +216,7 @@ int main(int argc, char *argv[]) {
     h = (double *) malloc(sizeof(double) * N * M);
     g = (double *) malloc(sizeof(double) * N *M);
     initData(N,M,rank, g);
-    memSize = N * M * 2 * sizeof(double) / double(1024 * 1024);
+    memSize = N * M * 2 * sizeof(double) / (double)(1024 * 1024);
 
     if (rank == 0) {
         printf("Local data size is %d x %d = %f MB.\n", N,
