@@ -355,11 +355,13 @@ int main(int argc, char *argv[]) {
         char filename[100];
         sprintf(filename,"%s/%d.dat",outfolder,i);
         int status=-1;
+        
         writeDoubleData_inBytes(result, N*M, filename, &status);
-        free(result);
+        printf("erzi\n");
+       // free(result);
     }
-    free(g);
-    free(h);
+    //free(g);
+    //free(h);
     MPI_Finalize();
     
     return 0;
