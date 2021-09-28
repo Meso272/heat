@@ -223,8 +223,9 @@ int main(int argc, char *argv[]) {
     FTI_Protect(1, h, M*nbLines, FTI_DBLE);
     FTI_Protect(2, g, M*nbLines, FTI_DBLE);
     */
-    wtime = MPI_Wtime();
     MPI_Barrier(MPI_COMM_WORLD);
+    wtime = MPI_Wtime();
+    
     for (i = 0; i < ITER_TIMES; i++) {
         //int checkpointed = FTI_Snapshot();
         localerror = doWork(nbProcs, rank, N, M, g, h);
@@ -236,6 +237,7 @@ int main(int argc, char *argv[]) {
             int status=-1;
             writeDoubleData_inBytes(g, N*M, filename, &status);
         }
+        MPI_Barrier(MPI_COMM_WORLD);
         if ((i%REDUCE) == 0) {
             MPI_Allreduce(&localerror, &globalerror, 1, MPI_DOUBLE, MPI_MAX,
              MPI_COMM_WORLD);
@@ -246,7 +248,7 @@ int main(int argc, char *argv[]) {
         }
         */
     }
-    MPI_Barrier(MPI_COMM_WORLD);
+
     if (rank == 0) {
         printf("Execution finished in %lf seconds with %d iterations.\n", MPI_Wtime() - wtime,i);
     }
