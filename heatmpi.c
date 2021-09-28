@@ -277,7 +277,7 @@ int main(int argc, char *argv[]) {
         free(h);
         free(g);
     }
-    MPI_Barrier();
+    MPI_Barrier(MPI_COMM_WORLD);
     MPI_Finalize();
     
     return 0;
