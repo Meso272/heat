@@ -119,16 +119,7 @@ void print_solution (char *filename, double *u, int size)
    if (outfile != stdout)
       fclose(outfile);
 
-#ifdef INTERACTIVE
-   /* Copy to another data file for gnuplot to plot */
-   if (outfile != stdout) {
-      char tempname[100];              /* Temp file name for gnuplot */
-      char cmd[1024];                  /* System command buffer */
-      sprintf(tempname, "jacobi.dat");
-      sprintf(cmd, "cp %s %s", filename, tempname);
-      system(cmd);
-   }
-#endif
+
    
 }
 
@@ -234,6 +225,8 @@ int main(int argc, char *argv[]) {
     for (i = 0; i < ITER_TIMES; i++) {
         //int checkpointed = FTI_Snapshot();
         localerror = doWork(nbProcs, rank, N, M, g, h);
+        if(rank==0)
+            printf("%d\n",g[M]);
         if ( (save_interval>0)&&((i%save_interval) == 0) && (rank == 0)) {
             printf("Step : %d, error = %f\n", i, globalerror);
             char filename[100];
