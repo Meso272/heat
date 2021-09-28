@@ -330,6 +330,7 @@ int main(int argc, char *argv[]) {
         printf("baba%d\n",rank);
         MPI_Isend(g+M,linesnum*M,MPI_DOUBLE, 0, WORKTAG,
     MPI_COMM_WORLD, &sreq);
+        printf("send from %d, %f\n",rank,g[M+1]);
         
     }
     if(rank==0){
@@ -347,6 +348,7 @@ int main(int argc, char *argv[]) {
             int pid_end=(pid+1)*N/nbProcs-1;
             printf("mama%d\n",pid_start);
             MPI_Irecv(result+pid_start*M, (pid_end-pid_start+1)*M, MPI_DOUBLE, pid, WORKTAG,MPI_COMM_WORLD, &rreq[pid]);
+            printf("received from%d %f\n",result[pid_start*M+1]);
             
 
         }
