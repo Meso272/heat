@@ -360,7 +360,9 @@ int main(int argc, char *argv[]) {
         char filename[100];
         sprintf(filename,"%s/%d.dat",outfolder,i);
         int status=-1;
-        
+        printf("%f\n",result[M]);
+        printf("%f\n",result[M+M/2]);
+        printf("%f\n",result[(N/2)*M+M/2]);
         writeDoubleData_inBytes(result, N*M, filename, &status);
         printf("erzi\n");
        // free(result);
