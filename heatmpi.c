@@ -216,6 +216,7 @@ int main(int argc, char *argv[]) {
     h = (double *) malloc(sizeof(double) * N * M);
     g = (double *) malloc(sizeof(double) * N *M);
     initData(N,M,rank, g);
+    initData(N,M,rank, h);
     memSize = N * M * 2 * sizeof(double) / (double)(1024 * 1024);
 
     if (rank == 0) {
