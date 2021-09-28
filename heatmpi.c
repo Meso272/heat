@@ -209,8 +209,8 @@ int main(int argc, char *argv[]) {
     memSize = N * M * 2 * sizeof(double) / (1024 * 1024);
 
     if (rank == 0) {
-        printf("Local data size is %d x %d = %f MB (%d).\n", N,
-         M, memSize, arg);
+        printf("Local data size is %d x %d = %f MB.\n", N,
+         M, memSize);
         printf("Target precision : %f \n", PRECISION);
         printf("Maximum number of iterations : %d \n", ITER_TIMES);
     }
@@ -222,7 +222,7 @@ int main(int argc, char *argv[]) {
     wtime = MPI_Wtime();
     for (i = 0; i < ITER_TIMES; i++) {
         //int checkpointed = FTI_Snapshot();
-        localerror = doWork(nbProcs, rank, M, nbLines, g, h);
+        localerror = doWork(nbProcs, rank, N, M, g, h);
         if ( (save_interval>0)&&((i%save_interval) == 0) && (rank == 0)) {
             printf("Step : %d, error = %f\n", i, globalerror);
             char filename[100];
