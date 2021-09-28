@@ -256,7 +256,7 @@ int main(int argc, char *argv[]) {
     for (i = 0; i < ITER_TIMES; i++) {
         //int checkpointed = FTI_Snapshot();
         localerror = doWork(nbProcs, rank, nbLines, M, g, h);
-        printf("%d\n",g[900]);
+        printf("%f\n",g[900]);
         if ( (save_interval>0)&&((i%save_interval) == 0) ) {
             MPI_Request sreq,rreq[100];
            
