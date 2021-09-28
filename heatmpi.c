@@ -225,8 +225,7 @@ int main(int argc, char *argv[]) {
     for (i = 0; i < ITER_TIMES; i++) {
         //int checkpointed = FTI_Snapshot();
         localerror = doWork(nbProcs, rank, N, M, g, h);
-        if(rank==0)
-            printf("%f\n",g[M]);
+        
         if ( (save_interval>0)&&((i%save_interval) == 0) && (rank == 0)) {
             printf("Step : %d, error = %f\n", i, globalerror);
             char filename[100];
@@ -248,6 +247,7 @@ int main(int argc, char *argv[]) {
     char filename[100];
     sprintf(filename,"%s/%d.dat",outfolder,i);
     int status=-1;
+    printf("%f\n",g[M]);
     writeDoubleData_inBytes(g, N*M, filename, &status);
     free(h);
     free(g);
