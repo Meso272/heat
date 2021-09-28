@@ -133,9 +133,9 @@ double doWork(int numprocs, int rank, int nbLines, int M, double *g,
     
     int total_lines=nbLines-2;
     int start=rank*total_lines/numprocs+1;
-    printf("start:%d\n",start);
+    printf("start:%d\n,rank:%d\n",start,rank);
     int end=(rank+1)*total_lines/numprocs;
-    printf("end:%d\n",end);
+    printf("end:%d\n,rank:%d\n",end,rank);
     for (i = start; i <= end; i++) {
         for (j = 1; j < M-1; j++) {
             h[(i*M)+j] = g[(i*M)+j];
