@@ -251,7 +251,7 @@ int main(int argc, char *argv[]) {
         char filename[100];
         sprintf(filename,"%s/%d.dat",outfolder,i);
         int status=-1;
-        printf("%f\n",g[200])
+        printf("%f\n",g[200]);
         writeDoubleData_inBytes(g, N*M, filename, &status);
         free(h);
         free(g);
