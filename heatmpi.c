@@ -168,7 +168,7 @@ double doWork(int numprocs, int rank, int nbLines, int M, double *g,
         MPI_Waitall(2, req2, status2);
     }
     */
-    MPI_Barrier();
+    MPI_Barrier(MPI_COMM_WORLD);
     for (i = start; i <=end; i++) {
         for (j = 1; j < M-1; j++) {
             g[(i*M)+j] = 0.25*(h[((i-1)*M)+j]+h[((i+1)*M)+j]+
