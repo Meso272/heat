@@ -17,7 +17,7 @@
 
 
 #define PRECISION   0.001
-#define ITER_TIMES  10000
+#define ITER_TIMES  1000
 //#define ITER_OUT    1000
 #define WORKTAG     50
 #define REDUCE      1
@@ -335,10 +335,11 @@ int main(int argc, char *argv[]) {
         
     }
     if(rank==0){
-        for(i=0;i<end;i++){
+        int ii;
+        for(ii=0;ii<=end;ii++){
             int j;
             for(j=0;j<M;j++){
-                result[i*M+j]=g[i*M+j];
+                result[ii*M+j]=g[ii*M+j];
             }
         }
         //printf("%f\n",g[M]);
