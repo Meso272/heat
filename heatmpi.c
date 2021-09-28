@@ -259,7 +259,7 @@ int main(int argc, char *argv[]) {
         //printf("%f\n",g[900]);
         if ( (save_interval>0)&&((i%save_interval) == 0) ) {
             //MPI_Request sreq,rreq[100];
-           
+            MPI_Status st;
             
             if(rank>0){
                 int linesnum=nbLines-2;
@@ -281,7 +281,7 @@ int main(int argc, char *argv[]) {
                     int pid_start=pid*N/nbProcs;
                     int pid_end=(pid+1)*N/nbProcs-1;
                     MPI_Recv(result+pid_start*M, (pid_end-pid_start+1)*M, MPI_DOUBLE, pid, WORKTAG,
-         MPI_COMM_WORLD);
+         MPI_COMM_WORLD,&st);
 
                 }
             }
@@ -321,6 +321,7 @@ int main(int argc, char *argv[]) {
     
     //FTI_Finalize();
     //MPI_Request sreq,rreq[100];
+    MPI_Status st;
     
             
     if(rank>0){
@@ -347,7 +348,7 @@ int main(int argc, char *argv[]) {
             int pid_start=pid*N/nbProcs;
             int pid_end=(pid+1)*N/nbProcs-1;
             printf("mama%d\n",pid_start);
-            MPI_Recv(result+pid_start*M, (pid_end-pid_start+1)*M, MPI_DOUBLE, pid, WORKTAG,MPI_COMM_WORLD);
+            MPI_Recv(result+pid_start*M, (pid_end-pid_start+1)*M, MPI_DOUBLE, pid, WORKTAG,MPI_COMM_WORLD,&st);
             printf("received from%d %f\n",pid,result[pid_start*M+1]);
             
 
