@@ -126,16 +126,16 @@ void print_solution (char *filename, double *u, int size)
 double doWork(int numprocs, int rank, int nbLines, int M, double *g,
  double *h) {
     int i, j;
-    MPI_Request req1[2], req2[2];
-    MPI_Status status1[2], status2[2];
+    //MPI_Request req1[2], req2[2];
+    //MPI_Status status1[2], status2[2];
     double localerror;
     localerror = 0;
     
     int total_lines=nbLines-2;
     int start=rank*total_lines/numprocs+1;
-    printf("start:%d\n,rank:%d\n",start,rank);
+    //printf("start:%d\n,rank:%d\n",start,rank);
     int end=(rank+1)*total_lines/numprocs;
-    printf("end:%d\n,rank:%d\n",end,rank);
+    //printf("end:%d\n,rank:%d\n",end,rank);
     for (i = start; i <= end; i++) {
         for (j = 1; j < M-1; j++) {
             h[(i*M)+j] = g[(i*M)+j];
@@ -260,7 +260,7 @@ int main(int argc, char *argv[]) {
         sprintf(filename,"%s/%d.dat",outfolder,i);
         int status=-1;
         //printf("%f\n",g[200]);
-        writeDoubleData_inBytes(g, N*M, filename, &status);
+        writeDoubleData_inBytes(h, N*M, filename, &status);
         free(h);
         free(g);
     }
