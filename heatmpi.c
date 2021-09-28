@@ -205,6 +205,7 @@ int main(int argc, char *argv[]) {
     */
     MPI_Comm_size(MPI_COMM_WORLD, &nbProcs);
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    MPI_Bcast(&h,1,MPI_DOUBLE)
     
     
     
@@ -228,7 +229,7 @@ int main(int argc, char *argv[]) {
     
     MPI_Barrier(MPI_COMM_WORLD);
     wtime = MPI_Wtime();
-    /*
+    
     for (i = 0; i < ITER_TIMES; i++) {
         //int checkpointed = FTI_Snapshot();
         localerror = doWork(nbProcs, rank, N, M, g, h);
@@ -245,14 +246,15 @@ int main(int argc, char *argv[]) {
             MPI_Allreduce(&localerror, &globalerror, 1, MPI_DOUBLE, MPI_MAX,
              MPI_COMM_WORLD);
         }
-        
+        /*
         if (globalerror < PRECISION) {
             break;
         }
+        */
         
         
     }
-    */
+    
     if (rank == 0) {
         printf("Execution finished in %lf seconds with %d iterations.\n", MPI_Wtime() - wtime,i);
     }
