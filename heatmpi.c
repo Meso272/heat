@@ -189,8 +189,7 @@ int main(int argc, char *argv[]) {
     N = atoi(argv[1]);
     M = atoi(argv[2]);
     outfolder=argv[3];
-    h = (double *) malloc(sizeof(double) * N * M);
-    g = (double *) malloc(sizeof(double) * N *M);
+    
     
     if (argc>=5)
         save_interval=atoi(argv[4]);
@@ -205,16 +204,20 @@ int main(int argc, char *argv[]) {
     */
     MPI_Comm_size(MPI_COMM_WORLD, &nbProcs);
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-    MPI_Bcast(&g,1,MPI_DOUBLE,0,MPI_COMM_WORLD);
-    MPI_Bcast(&h,1,MPI_DOUBLE,0,MPI_COMM_WORLD);
+    
 
     
     
     
     
-    
-    initData(N,M,rank, g);
-    initData(N,M,rank, h);
+    if(rank==0){
+        h = (double *) malloc(sizeof(double) * N * M);
+        g = (double *) malloc(sizeof(double) * N *M);
+        initData(N,M,rank, g);
+        initData(N,M,rank, h);
+    }
+    MPI_Bcast(&g,sizeof(double*),MPI_BYTE,0,MPI_COMM_WORLD);
+    MPI_Bcast(&h,sizeof(double*),MPI_BYTE,0,MPI_COMM_WORLD);
     memSize = N * M * 2 * sizeof(double) / (double)(1024 * 1024);
 
     if (rank == 0) {
@@ -270,8 +273,8 @@ int main(int argc, char *argv[]) {
         int status=-1;
         //printf("%f\n",g[200]);
         writeDoubleData_inBytes(g, N*M, filename, &status);
-        //free(h);
-       // free(g);
+        free(h);
+        free(g);
     }
     MPI_Finalize();
     
