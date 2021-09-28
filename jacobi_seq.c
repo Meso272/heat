@@ -31,7 +31,7 @@ char filename[100];              /* File name of output file */
 /* Grid size */
 int M = 200;                     /* Number of rows */
 int N = 200;                     /* Number of cols */
-long max_its = 100000;           /* Maximum iterations */
+long max_its = 10000;           /* Maximum iterations */
 double final_diff;               /* Temperature difference between iterations at the end */
 
 /* Interactive mode is solely for demonstration purpose on gnuplot */
