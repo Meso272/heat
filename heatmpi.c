@@ -237,9 +237,11 @@ int main(int argc, char *argv[]) {
             MPI_Allreduce(&localerror, &globalerror, 1, MPI_DOUBLE, MPI_MAX,
              MPI_COMM_WORLD);
         }
+        /*
         if (globalerror < PRECISION) {
             break;
         }
+        */
     }
     if (rank == 0) {
         printf("Execution finished in %lf seconds with %d iterations.\n", MPI_Wtime() - wtime,i);
