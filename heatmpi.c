@@ -226,7 +226,7 @@ int main(int argc, char *argv[]) {
         //int checkpointed = FTI_Snapshot();
         localerror = doWork(nbProcs, rank, N, M, g, h);
         if(rank==0&&i<100)
-            printf("%d\n",g[M]);
+            printf("%f\n",g[M]);
         if ( (save_interval>0)&&((i%save_interval) == 0) && (rank == 0)) {
             printf("Step : %d, error = %f\n", i, globalerror);
             char filename[100];
