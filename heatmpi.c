@@ -139,8 +139,8 @@ double doWork(int numprocs, int rank, int nbLines, int M, double *g,
     MPI_Status status1[2], status2[2];
     double localerror;
     localerror = 0;
-    for (i = 0; i < nbLines; i++) {
-        for (j = 0; j < M; j++) {
+    for (i = 1; i < nbLines-1; i++) {
+        for (j = 1; j < M-1; j++) {
             h[(i*M)+j] = g[(i*M)+j];
         }
     }
@@ -163,7 +163,7 @@ double doWork(int numprocs, int rank, int nbLines, int M, double *g,
         MPI_Waitall(2, req2, status2);
     }
     for (i = 1; i < (nbLines-1); i++) {
-        for (j = 0; j < M; j++) {
+        for (j = 1; j < M-1; j++) {
             g[(i*M)+j] = 0.25*(h[((i-1)*M)+j]+h[((i+1)*M)+j]+
                 h[(i*M)+j-1]+h[(i*M)+j+1]);
             if (localerror < fabs(g[(i*M)+j] - h[(i*M)+j])) {
