@@ -186,6 +186,8 @@ int main(int argc, char *argv[]) {
     int rank, nbProcs, N, i, M, save_interval;//save_interval optional, -1 means only save last
     char *outfolder;
     double wtime, *h, *g, memSize, localerror, globalerror = 1;
+    h = (double *) malloc(sizeof(double) * N * M);
+    g = (double *) malloc(sizeof(double) * N *M);
     N = atoi(argv[1]);
     M = atoi(argv[2]);
     outfolder=argv[3];
@@ -206,8 +208,7 @@ int main(int argc, char *argv[]) {
     
     
     
-    h = (double *) malloc(sizeof(double) * N * M);
-    g = (double *) malloc(sizeof(double) * N *M);
+    
     initData(N,M,rank, g);
     initData(N,M,rank, h);
     memSize = N * M * 2 * sizeof(double) / (double)(1024 * 1024);
