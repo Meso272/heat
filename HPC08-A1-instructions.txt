@@ -1,0 +1,244 @@
+************************************************
+*  Instructions and Guidelines on Assignment 1 *
+************************************************
+
+##################################
+#  Sequential Jacobi             #
+##################################
+
+jacobi.c
+========
+jacobi.c is the sequential program that solves the steady-state temperature 
+distribution problem using the Jacobi method. 
+
+The compilation and execution commands have been documented in the program 
+heading and recapped here for your convenience:
+
+Compile on Belief:
+------------------
+export PATH=/opt/SUNWspro/bin:$PATH
+cc -xO3 -o jacobi_seq jacobi_seq.c -lm
+cc -xO3 -o jacobi_seq jacobi_seq.c -lm -DINTERACTIVE 
+(for interactive output display in gnuplot)
+
+Compile on Gideon:
+------------------
+cc -O3 -o jacobi_seq jacobi_seq.c -lm
+cc -O3 -o jacobi_seq jacobi_seq.c -lm -DINTERACTIVE 
+(for interactive output display in gnuplot)
+
+Execute on Both Platforms:
+--------------------------
+./jacobi_seq [optional: <rows> <cols>]
+
+
+jacobi.c outputs a data file called jacobi_seq.dat to the current directory at 
+the end of execution. This file can be plotted in gnuplot on both Belief and 
+Gideon by using the script plot.sh provided for you, so as to faciliate your 
+understanding and correctness verfication of the parallel program if you 
+maintains this feature in it.
+
+jacobi_seq.c supports a compiler directive called INTERACTIVE. If you supply it, 
+then the program will write the output after every <its_refresh> iterations 
+(its_refresh pre-defined as 1,000 in the program) and copy the most updated 
+jacobi_seq.dat to another file called jacobi.dat for gnuplot to read and replot 
+on the screen. So you can watch the color gradual change when the heat diffusion 
+is being simulated by the program. For performance benchmarking, you should NOT 
+compile with -DINTERACTIVE because it is very intensive and distorts your 
+program achievable speeudp.
+
+For your reference, the longest execution time in this assignment, i.e. 
+sequential for problem size 400, is about 6-7 minutes. If you don't want to wait 
+too much and block the others' performance benchmarking, you are allowed to 
+simply take the sequential time in our sample on your report. But other 
+measurements must be your own work.
+
+
+Using Gnuplot to View the Temperature Array:
+--------------------------------------------
+Plotting the output data file on gnuplot can help your understanding and 
+correctness checking. The plots are not needed to hand in. 
+
+To use gnuplot, start a VNC server on Belief as instructed in the department 
+intranet's technical support page. Use a VNC client like RealVNC viewer to 
+connect to the server. You may set the color level to Full in options of the VNC 
+client in order to view the gradual color change.
+
+On the VNC screen, 
+- open a terminal by pressing Ctrl+T if there is none
+- start an X terminal by typing 'xterm' at the terminal
+- under the X terminal, type './plot.sh <arguments>' to plot the data
+
+Note: the data file must be present before calling the script
+
+Arguments to plot.sh:
+plot.sh <rows> <cols> [datafile] [refresh_mode] [plot_as_3d]
+The first two are mandatory and the last three are optional.
+
+[datafile]: if not provided, the script assumes the data file name is simply 
+jacobi.dat.
+
+[refresh_mode]: this only accepts two values: "r2" or "r3" meaning refresh the 
+plot every 2 or every 3 seconds respectively. This is for viewing continous 
+color change of the plot when the program is executing.
+
+[plot_as_3d]: if you prefer to view the height of value in a 3D plot instead of 
+color map, you can provide the value "3d" for this argument.
+
+Examples of usages are below:
+
+./plot.sh 200 200			
+Plot jacobi.dat as a colormap of size 200 x 200
+
+./plot.sh 200 200 r2			
+Plot jacobi.dat as a colormap of size 200 x 200, replot every 2 seconds 
+
+./plot.sh 200 200 r3
+Plot jacobi.dat as a colormap of size 200 x 200, replot every 3 seconds
+
+./plot.sh 200 200 jacobi_seq.dat 3d
+Plot jacobi_seq.dat as a 3D colormap of size 200 x 200
+
+./plot.sh 200 200 3d r3
+Plot jacobi.dat as a 3D colormap of size 200 x 200, replot every 3 seconds
+
+
+*** Special Note:
+DON'T always run the program in interactive mode. This generates lots of I/O 
+(and NFS overheads) to the system. Gnuplot's replot at every 2 to 3 seconds is 
+also compute-intensive and could affect other users. So be considerate to keep 
+it short; after you have understood the heat diffusion matter by a few runs in 
+interactive mode, please switch back to be without it.
+
+Also REMEMBER to exit (by Ctrl+C) the interactive mode in any your VNC'ed 
+sessions before you leave your work or else other users could be affected.
+
+
+##################################
+#  Parallel Jacobi Using OpenMP  #
+##################################
+
+You are going to develop an OpenMP program called jacobi_omp.c based on the 
+sequential version. Add omp primitives in the find_steady_state function to 
+speed up the program. It should print out the #iterations, error to the exact 
+solution and the elapsed time as the sequential version did. Also, we suggest 
+your program writes data to the file name jacobi_omp.dat for easy reference and 
+comparison. 
+
+Below are instructions for compiling and running the program.
+
+jacobi_omp.c
+============
+Compile on Belief:
+export PATH=/opt/SUNWspro/bin:$PATH
+cc -xO3 -xopenmp=parallel -o jacobi_omp jacobi_omp.c -lm
+cc -xO3 -xopenmp=parallel -o jacobi_omp jacobi_omp.c -lm -DINTERACTIVE 
+(for interactive output display in gnuplot)
+
+Execute:  export PARALLEL=4
+          ./jacobi_omp [optional: <rows> <cols>]
+
+(PARALLEL is the environment variable to control the default number of threads 
+to spawn when entering a parallel region in an OpenMP program. You can use other 
+methods like omp_set_num_threads as taught in the lectures.)
+
+
+
+##################################
+#  Parallel Jacobi Using MPI     #
+##################################
+
+You are going to develop a MPI program called jacobi_mpi.c based on the 
+sequential version. It should print out the #iterations, error to the exact 
+solution and the elapsed time as the sequential version did. Also, we suggest 
+your program writes data to the file name jacobi_mpi.dat for easy reference and 
+comparison. 
+
+If n < p, the MPI program will result in error. So your MPI program should add 
+additional checking to guard invalid problem size input. Think about the lowest 
+bound of n that your program supports. 
+
+You should parallelize the following functions:
+- initialize_array, each process has their own share of the arrays u and w
+- find_steady_state, each process computes on their own portion of array and 
+communicates on needs 
+- print_solution, each process send their computed result to one process usually 
+the process 0 for combining and printing out to data file.
+
+MyMPI.h
+=======
+This header file is from the reference text book of Michael J. Quinn. I included 
+it here to simplify your effort of data decomposition. Whether to include it to 
+your program or not is up to your choice.
+
+Calling the macro r = BLOCK_SIZE(id,p,n) will return the number of data items 
+that are allocated to the control of process <id> if your problem size is <n> 
+and there are <p> processes. (Remember process <id> starts from 0.)
+
+
+Below are instructions for compiling and running the program.
+
+jacobi_mpi.c
+============
+Compile on Gideon:
+export PATH=/usr/local/mpich-1.2.7p1/bin:$PATH
+mpicc -O3 -o jacobi_mpi jacobi_mpi.c -lm
+mpicc -O3 -o jacobi_mpi jacobi_mpi.c -lm -DINTERACTIVE 
+(for interactive output display in gnuplot)
+
+Execute:   
+mpirun -machinefile machines.txt -np 4 jacobi_mpi [optional: <rows> <cols>]
+
+
+
+##########################################################
+#  Output Consistency between Program Versions           #
+##########################################################
+
+Your developed programs have to produce "consistent" output as the sequential 
+program. Ideally, it should have the identical behavior: be able to stop at the 
+same iteration count, produce the same data file and all the same thing on 
+stdout as the sequential did for all valid problem sizes under consideration. 
+But in this assignment, we allow you to overdo on the convergence. Suppose 
+jacobi_seq.c needs 54413 iterations to converge within EPSILON = 0.0001 and the 
+final error is 0.00099998. If your parallel program does fewer than 54413 
+iterations and has an error > 0.00099998, we would regard your program 
+incorrect. If your parallel program runs more than 54413 iterations and gets an 
+error <=0.00099998, then we accept your answer because it's not wrong but just 
+an overrun. However, we don't encourage this because you will lose performance 
+on iterating more than the required specified. Also, you are not allowed to 
+hardcode the number of iterations to be that observed from the sequential in 
+order to stop your parallel program. Your parallel program should stop by 
+checking the maximum temperature difference between iterations against EPSILON.
+
+If you follow our suggested requirement above, the output files generated by all 
+the three program versions will be the same. Then you can easily verify your 
+program correctness by comparing the files using the 'diff' command on Linux:
+
+diff jacobi_seq.dat jacobi_omp.dat
+diff jacobi_seq.dat jacobi_mpi.dat
+
+The commands should give out nothing if your programs are correct. Otherwise, 
+the diff command will show you the lines of difference between the files under 
+comparison.
+
+
+
+##########################################################
+#  Known Problems                                        #
+##########################################################
+
+Sometimes you may encounter the problem below especially using a lot of 
+processes:
+
+"Timeout in waiting for processes to exit, 1 left.  This may be due to a 
+defective rsh program (Some versions of Kerberos rsh have been observed to have 
+this problem).This is not a problem with P4 or MPICH but a problem with the 
+operating environment. For many applications, this problem will only slow down
+process termination."
+
+At this moment, I am not sure the root cause. Please try repeating your test 
+case to see if it is successful. If the problem persists, please contact me.
+
+
+Author: King Tin LAM (Tutor of CSIS7303 2007-2008)
