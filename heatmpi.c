@@ -265,7 +265,7 @@ int main(int argc, char *argv[]) {
                 int linesnum=nbLines-2;
                 if (rank==nbProcs-1)
                     linesnum++;
-                MPI_Isend(g+M,linesnum*M,MPI_DOUBLE, 0, WORKTAG,
+                MPI_send(g+M,linesnum*M,MPI_DOUBLE, 0, WORKTAG,
          MPI_COMM_WORLD, &sreq);
             }
             if(rank==0){
@@ -280,7 +280,7 @@ int main(int argc, char *argv[]) {
                 for(pid=1;pid<nbProcs;pid++){
                     int pid_start=pid*N/nbProcs;
                     int pid_end=(pid+1)*N/nbProcs-1;
-                    MPI_Irecv(result+pid_start*M, (pid_end-pid_start+1)*M, MPI_DOUBLE, pid, WORKTAG,
+                    MPI_recv(result+pid_start*M, (pid_end-pid_start+1)*M, MPI_DOUBLE, pid, WORKTAG,
          MPI_COMM_WORLD, &rreq[pid]);
 
                 }
