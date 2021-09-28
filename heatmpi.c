@@ -20,7 +20,7 @@
 #define ITER_TIMES  10000
 //#define ITER_OUT    1000
 #define WORKTAG     50
-#define REDUCE      5
+#define REDUCE      1
 typedef union ldouble
 {
     double value;
@@ -139,11 +139,16 @@ double doWork(int numprocs, int rank, int nbLines, int M, double *g,
     MPI_Status status1[2], status2[2];
     double localerror;
     localerror = 0;
-    for (i = 1; i < nbLines-1; i++) {
+    
+    int total_lines=nbLines-2;
+    int start=rank*total_lines/numprocs+1;
+    int end=(rank+1)*total_lines/numprocs;
+    for (i = start; i <= end; i++) {
         for (j = 1; j < M-1; j++) {
             h[(i*M)+j] = g[(i*M)+j];
         }
     }
+    /*
     if (rank > 0) {
         MPI_Isend(g+M, M, MPI_DOUBLE, rank-1, WORKTAG,
          MPI_COMM_WORLD, &req1[0]);
@@ -162,7 +167,9 @@ double doWork(int numprocs, int rank, int nbLines, int M, double *g,
     if (rank < numprocs-1) {
         MPI_Waitall(2, req2, status2);
     }
-    for (i = 1; i < (nbLines-1); i++) {
+    */
+    MPI_barrier();
+    for (i = start; i <=end; i++) {
         for (j = 1; j < M-1; j++) {
             g[(i*M)+j] = 0.25*(h[((i-1)*M)+j]+h[((i+1)*M)+j]+
                 h[(i*M)+j-1]+h[(i*M)+j+1]);
@@ -186,7 +193,13 @@ int main(int argc, char *argv[]) {
     int rank, nbProcs, N, i, M, save_interval;//save_interval optional, -1 means only save last
     char *outfolder;
     double wtime, *h, *g, memSize, localerror, globalerror = 1;
-
+    N = atoi(argv[1]);
+    M = atoi(argv[2]);
+    outfolder=argv[3];
+    if (argc>=5)
+        save_interval=atoi(argv[4]);
+    else
+        save_interval=-1;
     MPI_Init(&argc, &argv);
     /*
     if (FTI_Init(argv[2], MPI_COMM_WORLD) !=  0) {
@@ -197,16 +210,11 @@ int main(int argc, char *argv[]) {
     MPI_Comm_size(MPI_COMM_WORLD, &nbProcs);
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     
-    N = atoi(argv[1]);
-    M = atoi(argv[2]);
-    outfolder=argv[3];
-    if (argc>=5)
-        save_interval=atoi(argv[4]);
-    else
-        save_interval=-1;
     
-    h = (double *) malloc(sizeof(double *) * N * M);
-    g = (double *) malloc(sizeof(double *) * N *M);
+    
+    
+    h = (double *) malloc(sizeof(double) * N * M);
+    g = (double *) malloc(sizeof(double) * N *M);
     initData(N,M,rank, g);
     memSize = N * M * 2 * sizeof(double) / (1024 * 1024);
 
