@@ -247,13 +247,16 @@ int main(int argc, char *argv[]) {
     
 
     //FTI_Finalize();
+    if(rank==0){
+        char filename[100];
+        sprintf(filename,"%s/%d.dat",outfolder,i);
+        int status=-1;
+    
+        writeDoubleData_inBytes(g, N*M, filename, &status);
+        free(h);
+        free(g);
+    }
     MPI_Finalize();
-    char filename[100];
-    sprintf(filename,"%s/%d.dat",outfolder,i);
-    int status=-1;
-    printf("%f\n",g[M]);
-    writeDoubleData_inBytes(g, N*M, filename, &status);
-    free(h);
-    free(g);
+    
     return 0;
 }
