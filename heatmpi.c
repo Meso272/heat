@@ -270,8 +270,8 @@ int main(int argc, char *argv[]) {
         int status=-1;
         //printf("%f\n",g[200]);
         writeDoubleData_inBytes(g, N*M, filename, &status);
-        free(h);
-        free(g);
+        //free(h);
+       // free(g);
     }
     MPI_Finalize();
     
