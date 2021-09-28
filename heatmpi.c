@@ -205,7 +205,9 @@ int main(int argc, char *argv[]) {
     */
     MPI_Comm_size(MPI_COMM_WORLD, &nbProcs);
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-    MPI_Bcast(&h,1,MPI_DOUBLE)
+    MPI_Bcast(&g,1,MPI_DOUBLE,0,MPI_COMM_WORLD);
+    MPI_Bcast(&h,1,MPI_DOUBLE,0,MPI_COMM_WORLD);
+
     
     
     
