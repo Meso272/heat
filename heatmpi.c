@@ -339,13 +339,13 @@ int main(int argc, char *argv[]) {
                 result[i*M+j]=g[i*M+j];
             }
         }
-        printf("%f\n",g[M]);
-        printf("%f\n",result[M]);
+        //printf("%f\n",g[M]);
+        //printf("%f\n",result[M]);
         int pid;
         for(pid=1;pid<nbProcs;pid++){
             int pid_start=pid*N/nbProcs;
             int pid_end=(pid+1)*N/nbProcs-1;
-            printf("mama%d\n",pid);
+            printf("mama%d\n",pid_start);
             MPI_Irecv(result+pid_start*M, (pid_end-pid_start+1)*M, MPI_DOUBLE, pid, WORKTAG,MPI_COMM_WORLD, &rreq[pid]);
             
 
