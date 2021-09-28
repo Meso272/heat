@@ -199,9 +199,9 @@ int main(int argc, char *argv[]) {
     M = atoi(argv[2]);
     outfolder=argv[3];
     if (argc>=5)
-        save_interval=atoi(argv[4])
+        save_interval=atoi(argv[4]);
     else
-        save_interval=-1
+        save_interval=-1;
     
     h = (double *) malloc(sizeof(double *) * N * M);
     g = (double *) malloc(sizeof(double *) * N *M);
@@ -209,8 +209,8 @@ int main(int argc, char *argv[]) {
     memSize = N * M * 2 * sizeof(double) / (1024 * 1024);
 
     if (rank == 0) {
-        printf("Local data size is %d x %d = %f MB (%d).\n", M,
-         nbLines, memSize, arg);
+        printf("Local data size is %d x %d = %f MB (%d).\n", N,
+         M, memSize, arg);
         printf("Target precision : %f \n", PRECISION);
         printf("Maximum number of iterations : %d \n", ITER_TIMES);
     }
@@ -228,7 +228,7 @@ int main(int argc, char *argv[]) {
             char filename[100];
             sprintf(filename,"%s/%d.dat",outfolder,i);
             int status=-1;
-            writeDoubleData_inBytes(g, N*M, filename, &status)
+            writeDoubleData_inBytes(g, N*M, filename, &status);
         }
         if ((i%REDUCE) == 0) {
             MPI_Allreduce(&localerror, &globalerror, 1, MPI_DOUBLE, MPI_MAX,
@@ -244,7 +244,7 @@ int main(int argc, char *argv[]) {
     char filename[100];
     sprintf(filename,"%s/%d.dat",outfolder,i);
     int status=-1;
-    writeDoubleData_inBytes(g, N*M, filename, &status)
+    writeDoubleData_inBytes(g, N*M, filename, &status);
     free(h);
     free(g);
 
