@@ -12,11 +12,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <mpi.h>
 //#include <fti.h>
 
 
 #define PRECISION   0.001
-#define ITER_TIMES  100000
+#define ITER_TIMES  10000
 //#define ITER_OUT    1000
 #define WORKTAG     50
 #define REDUCE      5
