@@ -258,7 +258,7 @@ int main(int argc, char *argv[]) {
         localerror = doWork(nbProcs, rank, nbLines, M, g, h);
         //printf("%f\n",g[900]);
         if ( (save_interval>0)&&((i%save_interval) == 0) ) {
-            MPI_Request sreq,rreq[100];
+            //MPI_Request sreq,rreq[100];
            
             
             if(rank>0){
@@ -266,7 +266,7 @@ int main(int argc, char *argv[]) {
                 if (rank==nbProcs-1)
                     linesnum++;
                 MPI_Send(g+M,linesnum*M,MPI_DOUBLE, 0, WORKTAG,
-         MPI_COMM_WORLD, &sreq);
+         MPI_COMM_WORLD);
             }
             if(rank==0){
                 int ii;
@@ -281,7 +281,7 @@ int main(int argc, char *argv[]) {
                     int pid_start=pid*N/nbProcs;
                     int pid_end=(pid+1)*N/nbProcs-1;
                     MPI_Recv(result+pid_start*M, (pid_end-pid_start+1)*M, MPI_DOUBLE, pid, WORKTAG,
-         MPI_COMM_WORLD, &rreq[pid]);
+         MPI_COMM_WORLD);
 
                 }
             }
@@ -320,7 +320,7 @@ int main(int argc, char *argv[]) {
     
     
     //FTI_Finalize();
-    MPI_Request sreq,rreq[100];
+    //MPI_Request sreq,rreq[100];
     
             
     if(rank>0){
@@ -328,8 +328,8 @@ int main(int argc, char *argv[]) {
         if (rank==nbProcs-1)
             linesnum++;
         printf("baba%d\n",rank);
-        MPI_Isend(g+M,linesnum*M,MPI_DOUBLE, 0, WORKTAG,
-    MPI_COMM_WORLD, &sreq);
+        MPI_Send(g+M,linesnum*M,MPI_DOUBLE, 0, WORKTAG,
+    MPI_COMM_WORLD);
         printf("send from %d, %f\n",rank,g[M+1]);
         
     }
@@ -347,7 +347,7 @@ int main(int argc, char *argv[]) {
             int pid_start=pid*N/nbProcs;
             int pid_end=(pid+1)*N/nbProcs-1;
             printf("mama%d\n",pid_start);
-            MPI_Irecv(result+pid_start*M, (pid_end-pid_start+1)*M, MPI_DOUBLE, pid, WORKTAG,MPI_COMM_WORLD, &rreq[pid]);
+            MPI_Recv(result+pid_start*M, (pid_end-pid_start+1)*M, MPI_DOUBLE, pid, WORKTAG,MPI_COMM_WORLD);
             printf("received from%d %f\n",pid,result[pid_start*M+1]);
             
 
