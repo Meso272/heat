@@ -257,8 +257,8 @@ int main(int argc, char *argv[]) {
         localerror = doWork(nbProcs, rank, N, M, g, h);
         
         if ( (save_interval>0)&&((i%save_interval) == 0) ) {
-            MPI_Request sreq;
-            MPI_Status rstatus[100];
+            MPI_Request sreq,rreq[100];
+           
             
             if(rank>0){
                 int linesnum=nbLines-2;
@@ -268,9 +268,11 @@ int main(int argc, char *argv[]) {
          MPI_COMM_WORLD, &sreq);
             }
             if(rank==0){
-                for(i=0;i<end;i++){
+                int ii;
+                for(ii=0;ii<end;ii++){
+                    int j;
                     for(j=0;j<M;j++){
-                        result[i*M+j]=g[i*M+j];
+                        result[ii*M+j]=g[ii*M+j];
                     }
                 }
                 int pid;
@@ -278,7 +280,7 @@ int main(int argc, char *argv[]) {
                     int pid_start=pid*N/nbProcs;
                     int pid_end=(pid+1)*N/nbProcs-1;
                     MPI_Irecv(result+pid_start*M, (pid_end-pid_start+1)*M, MPI_DOUBLE, pid, WORKTAG,
-         MPI_COMM_WORLD, &rstatus[pid]);
+         MPI_COMM_WORLD, &rreq[pid]);
 
                 }
             }
@@ -317,8 +319,8 @@ int main(int argc, char *argv[]) {
     
     
     //FTI_Finalize();
-    MPI_Request sreq;
-    MPI_Status rstatus[100];
+    MPI_Request sreq,rreq[100];
+    
             
     if(rank>0){
         int linesnum=nbLines-2;
@@ -329,6 +331,7 @@ int main(int argc, char *argv[]) {
     }
     if(rank==0){
         for(i=0;i<end;i++){
+            int j;
             for(j=0;j<M;j++){
                 result[i*M+j]=g[i*M+j];
             }
@@ -337,7 +340,7 @@ int main(int argc, char *argv[]) {
         for(pid=1;pid<nbProcs;pid++){
             int pid_start=pid*N/nbProcs;
             int pid_end=(pid+1)*N/nbProcs-1;
-            MPI_Irecv(result+pid_start*M, (pid_end-pid_start+1)*M, MPI_DOUBLE, pid, WORKTAG,MPI_COMM_WORLD, &rstatus[pid]);
+            MPI_Irecv(result+pid_start*M, (pid_end-pid_start+1)*M, MPI_DOUBLE, pid, WORKTAG,MPI_COMM_WORLD, &rreq[pid]);
 
         }
     }
