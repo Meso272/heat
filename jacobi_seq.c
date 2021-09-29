@@ -223,7 +223,12 @@ typedef union ldouble
     unsigned long lvalue;
     unsigned char byte[8];
 } ldouble;
-
+typedef union lfloat
+{
+    float value;
+    unsigned int ivalue;
+    unsigned char byte[4];
+} lfloat;
 void writeByteData(unsigned char *bytes, size_t byteLength, char *tgtFilePath, int *status)
 {
     FILE *pFile = fopen(tgtFilePath, "wb");
@@ -264,7 +269,26 @@ void writeDoubleData_inBytes(double *data, size_t nbEle, char* tgtFilePath, int 
     free(bytes);
     *status = state;
 }
+void writeFloatData_inBytes(float *data, size_t nbEle, char* tgtFilePath, int *status)
+{
+  size_t i = 0; 
+  int state = RW_SCES;
+  lfloat buf;
+  unsigned char* bytes = (unsigned char*)malloc(nbEle*sizeof(float));
+  for(i=0;i<nbEle;i++)
+  {
+    buf.value = data[i];
+    bytes[i*4+0] = buf.byte[0];
+    bytes[i*4+1] = buf.byte[1];
+    bytes[i*4+2] = buf.byte[2];
+    bytes[i*4+3] = buf.byte[3];         
+  }
 
+  size_t byteLength = nbEle*sizeof(float);
+  writeByteData(bytes, byteLength, tgtFilePath, &state);
+  free(bytes);
+  *status = state;
+}
 void ConvertDoubleArray_2Dto1D(double **Array_2D,double * Array_1D, size_t M,size_t N){
    int i,j;
    for(i=0;i<M;i++){
