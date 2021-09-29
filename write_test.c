@@ -3,7 +3,7 @@ int main(int argc, char *argv[]){
     FILE *File = fopen("test.dat", "wb");
     int a=1;
     fseek(File,8,SEEK_SET);
-    fwrite(a,sizeof(int),1,File);
+    fwrite(&a,sizeof(int),1,File);
     fclose(File);
     return 0;
 }
