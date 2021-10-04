@@ -391,7 +391,7 @@ int main(int argc, char *argv[]) {
         printf("%f\n",result[M+M/2]);
         printf("%f\n",result[(N/2)*M+M/2]);
         writeFloatData_inBytes(result, N*M, filename, &status);
-        printf("erzi\n");
+       
        // free(result);
     }
     //free(g);
