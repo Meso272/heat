@@ -93,7 +93,7 @@ void writeFloatData_inBytes(float *data, size_t nbEle, char* tgtFilePath, int *s
     free(bytes);
     *status = state;
 }
-void initData(int nbProcs,int nbLines, int M, int rank, double *h) {
+void initData(int nbProcs,int nbLines, int M, int rank, float *h) {
     
     int i, j;
     for (i = 0; i < nbLines; i++) {
@@ -118,7 +118,7 @@ void initData(int nbProcs,int nbLines, int M, int rank, double *h) {
     */
 }
 
-void print_solution (char *filename, double *u, int size)
+void print_solution (char *filename, float *u, int size)
 {
    int i, j;
    char sep;
@@ -148,12 +148,12 @@ void print_solution (char *filename, double *u, int size)
    
 }
 
-double doWork(int numprocs, int rank, int nbLines, int M, double *g,
- double *h) {
+float doWork(int numprocs, int rank, int nbLines, int M, float *g,
+ float *h) {
     int i, j;
     MPI_Request req1[2], req2[2];
     MPI_Status status1[2], status2[2];
-    double localerror;
+    float localerror;
     localerror = 0;
     
     int total_lines=nbLines-2;
@@ -168,15 +168,15 @@ double doWork(int numprocs, int rank, int nbLines, int M, double *g,
     }
     
     if (rank > 0) {
-        MPI_Isend(g+M, M, MPI_DOUBLE, rank-1, WORKTAG,
+        MPI_Isend(g+M, M, MPI_FLOAT, rank-1, WORKTAG,
          MPI_COMM_WORLD, &req1[0]);
-        MPI_Irecv(h,   M, MPI_DOUBLE, rank-1, WORKTAG,
+        MPI_Irecv(h,   M, MPI_FLOAT, rank-1, WORKTAG,
          MPI_COMM_WORLD, &req1[1]);
     }
     if (rank < numprocs-1) {
-        MPI_Isend(g+((nbLines-2)*M), M, MPI_DOUBLE, rank+1, WORKTAG,
+        MPI_Isend(g+((nbLines-2)*M), M, MPI_FLOAT, rank+1, WORKTAG,
          MPI_COMM_WORLD, &req2[0]);
-        MPI_Irecv(h+((nbLines-1)*M), M, MPI_DOUBLE, rank+1, WORKTAG,
+        MPI_Irecv(h+((nbLines-1)*M), M, MPI_FLOAT, rank+1, WORKTAG,
          MPI_COMM_WORLD, &req2[1]);
     }
     if (rank > 0) {
@@ -210,16 +210,17 @@ double doWork(int numprocs, int rank, int nbLines, int M, double *g,
 int main(int argc, char *argv[]) {
     int rank, nbProcs, N, i, M, save_interval;//save_interval optional, -1 means only save last
     char *outfolder;
-    double wtime, *h, *g, memSize, localerror, globalerror = 1;
+    float wtime, *h, *g, memSize, localerror, globalerror = 1;
     N = atoi(argv[1]);
     M = atoi(argv[2]);
     outfolder=argv[3];
     
     
     if (argc>=5)
-        save_interval=atoi(argv[4]);
+        save_start=atoi(argv[4]);
+        save_end=atoi(argv[5]);
     else
-        save_interval=-1;
+        save_end=-1;
     MPI_Init(&argc, &argv);
     /*
     if (FTI_Init(argv[2], MPI_COMM_WORLD) !=  0) {
@@ -252,20 +253,20 @@ int main(int argc, char *argv[]) {
     
     
    
-    h = (double *) malloc(sizeof(double) * nbLines * M);
-    g = (double *) malloc(sizeof(double) * nbLines * M);
+    h = (float *) malloc(sizeof(float) * nbLines * M);
+    g = (float *) malloc(sizeof(float) * nbLines * M);
     initData(nbProcs,nbLines,M,rank, g);
     //initData(nbProcs,nbLines,M,rank, h);
   
     
-    memSize = N * M * 3 * sizeof(double) / (double)(1024 * 1024);
-    double * result;
+    memSize = N * M * 3 * sizeof(float) / (float)(1024 * 1024);
+    float * result;
     if (rank == 0) {
         printf("Local data size is %d x %d = %f MB.\n", N,
          M, memSize);
         printf("Target precision : %f \n", PRECISION);
         printf("Maximum number of iterations : %d \n", ITER_TIMES);
-        result= (double *) malloc(sizeof(double) * N * M);
+        result= (float *) malloc(sizeof(float) * N * M);
     }
     /*
     FTI_Protect(0, &i, 1, FTI_INTG);
@@ -281,7 +282,7 @@ int main(int argc, char *argv[]) {
         //int checkpointed = FTI_Snapshot();
         localerror = doWork(nbProcs, rank, nbLines, M, g, h);
         //printf("%f\n",g[900]);
-        if ( (save_interval>0)&&((i%save_interval) == 0) ) {
+        if ( i<=save_end&&i>=save_start ) {
             //MPI_Request sreq,rreq[100];
             MPI_Status st;
             
@@ -289,7 +290,7 @@ int main(int argc, char *argv[]) {
                 int linesnum=nbLines-2;
                 if (rank==nbProcs-1)
                     linesnum++;
-                MPI_Send(g+M,linesnum*M,MPI_DOUBLE, 0, WORKTAG,
+                MPI_Send(g+M,linesnum*M,MPI_FLOAT, 0, WORKTAG,
          MPI_COMM_WORLD);
             }
             if(rank==0){
@@ -304,7 +305,7 @@ int main(int argc, char *argv[]) {
                 for(pid=1;pid<nbProcs;pid++){
                     int pid_start=pid*N/nbProcs;
                     int pid_end=(pid+1)*N/nbProcs-1;
-                    MPI_Recv(result+pid_start*M, (pid_end-pid_start+1)*M, MPI_DOUBLE, pid, WORKTAG,
+                    MPI_Recv(result+pid_start*M, (pid_end-pid_start+1)*M, MPI_FLOAT, pid, WORKTAG,
          MPI_COMM_WORLD,&st);
 
                 }
@@ -321,12 +322,12 @@ int main(int argc, char *argv[]) {
 
 
                 int status=-1;
-                writeDoubleData_inBytes(result, N*M, filename, &status);
+                writeFloatData_inBytes(result, N*M, filename, &status);
             }
         }
         MPI_Barrier(MPI_COMM_WORLD);
         if ((i%REDUCE) == 0) {
-            MPI_Allreduce(&localerror, &globalerror, 1, MPI_DOUBLE, MPI_MAX,
+            MPI_Allreduce(&localerror, &globalerror, 1, MPI_FLOAT, MPI_MAX,
              MPI_COMM_WORLD);
         }
        
@@ -353,7 +354,7 @@ int main(int argc, char *argv[]) {
         if (rank==nbProcs-1)
             linesnum++;
         printf("baba%d\n",rank);
-        MPI_Send(g+M,linesnum*M,MPI_DOUBLE, 0, WORKTAG,
+        MPI_Send(g+M,linesnum*M,MPI_FLOAT, 0, WORKTAG,
     MPI_COMM_WORLD);
         printf("send from %d, %f\n",rank,g[M+1]);
         
@@ -373,7 +374,7 @@ int main(int argc, char *argv[]) {
             int pid_start=pid*N/nbProcs;
             int pid_end=(pid+1)*N/nbProcs-1;
             printf("mama%d\n",pid_start);
-            MPI_Recv(result+pid_start*M, (pid_end-pid_start+1)*M, MPI_DOUBLE, pid, WORKTAG,MPI_COMM_WORLD,&st);
+            MPI_Recv(result+pid_start*M, (pid_end-pid_start+1)*M, MPI_FLOAT, pid, WORKTAG,MPI_COMM_WORLD,&st);
             printf("received from%d %f\n",pid,result[pid_start*M+1]);
             
 
@@ -388,7 +389,7 @@ int main(int argc, char *argv[]) {
         printf("%f\n",result[M]);
         printf("%f\n",result[M+M/2]);
         printf("%f\n",result[(N/2)*M+M/2]);
-        writeDoubleData_inBytes(result, N*M, filename, &status);
+        writeFloatData_inBytes(result, N*M, filename, &status);
         printf("erzi\n");
        // free(result);
     }
