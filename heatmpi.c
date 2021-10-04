@@ -354,10 +354,10 @@ int main(int argc, char *argv[]) {
         int linesnum=nbLines-2;
         if (rank==nbProcs-1)
             linesnum++;
-        printf("baba%d\n",rank);
+        //printf("baba%d\n",rank);
         MPI_Send(g+M,linesnum*M,MPI_FLOAT, 0, WORKTAG,
     MPI_COMM_WORLD);
-        printf("send from %d, %f\n",rank,g[M+1]);
+        //printf("send from %d, %f\n",rank,g[M+1]);
         
     }
     if(rank==0){
@@ -374,9 +374,9 @@ int main(int argc, char *argv[]) {
         for(pid=1;pid<nbProcs;pid++){
             int pid_start=pid*N/nbProcs;
             int pid_end=(pid+1)*N/nbProcs-1;
-            printf("mama%d\n",pid_start);
+            //printf("mama%d\n",pid_start);
             MPI_Recv(result+pid_start*M, (pid_end-pid_start+1)*M, MPI_FLOAT, pid, WORKTAG,MPI_COMM_WORLD,&st);
-            printf("received from%d %f\n",pid,result[pid_start*M+1]);
+            //printf("received from%d %f\n",pid,result[pid_start*M+1]);
             
 
         }
@@ -387,9 +387,9 @@ int main(int argc, char *argv[]) {
         char filename[100];
         sprintf(filename,"%s/%d.dat",outfolder,i);
         int status=-1;
-        printf("%f\n",result[M]);
-        printf("%f\n",result[M+M/2]);
-        printf("%f\n",result[(N/2)*M+M/2]);
+        //printf("%f\n",result[M]);
+        //printf("%f\n",result[M+M/2]);
+        //printf("%f\n",result[(N/2)*M+M/2]);
         writeFloatData_inBytes(result, N*M, filename, &status);
        
        // free(result);
