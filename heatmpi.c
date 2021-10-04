@@ -76,7 +76,7 @@ void writeDoubleData_inBytes(double *data, size_t nbEle, char* tgtFilePath, int 
 void writeFloatData_inBytes(float *data, size_t nbEle, char* tgtFilePath, int *status)
 {
     size_t i = 0; 
-    int state = RW_SCES;
+    int state = 0;
     lfloat buf;
     unsigned char* bytes = (unsigned char*)malloc(nbEle*sizeof(float));
     for(i=0;i<nbEle;i++)
@@ -208,7 +208,7 @@ float doWork(int numprocs, int rank, int nbLines, int M, float *g,
 
 
 int main(int argc, char *argv[]) {
-    int rank, nbProcs, N, i, M, save_interval;//save_interval optional, -1 means only save last
+    int rank, nbProcs, N, i, M, save_start,save_end;//save_interval optional, -1 means only save last
     char *outfolder;
     float wtime, *h, *g, memSize, localerror, globalerror = 1;
     N = atoi(argv[1]);
@@ -216,9 +216,10 @@ int main(int argc, char *argv[]) {
     outfolder=argv[3];
     
     
-    if (argc>=5)
+    if (argc>=5){
         save_start=atoi(argv[4]);
         save_end=atoi(argv[5]);
+    }
     else
         save_end=-1;
     MPI_Init(&argc, &argv);
