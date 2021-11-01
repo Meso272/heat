@@ -93,7 +93,7 @@ void writeFloatData_inBytes(float *data, size_t nbEle, char* tgtFilePath, int *s
     free(bytes);
     *status = state;
 }
-void initData(int nbProcs,int nbLines, int M, int rank, float *h) {
+void initData(int nbProcs,int nbLines, int M, int rank, int initTemp,float *h) {
     
     int i, j;
     for (i = 0; i < nbLines; i++) {
@@ -101,7 +101,7 @@ void initData(int nbProcs,int nbLines, int M, int rank, float *h) {
             if((i==0&&rank==0)||(i==nbLines-1&&rank==nbProcs-1)||j==M-1)
                 h[(i*M)+j] = 0.0;
             else if(j==0)
-                h[(i*M)+j] = 1000.0;
+                h[(i*M)+j] = initTemp;
             else
                 h[(i*M)+j] = 25.0;
             
@@ -208,20 +208,25 @@ float doWork(int numprocs, int rank, int nbLines, int M, float *g,
 
 
 int main(int argc, char *argv[]) {
-    int rank, nbProcs, N, i, M, save_start,save_end;//save_interval optional, -1 means only save last
+    int rank, nbProcs, N, i, M, save_start,save_end,save_interval;//save_interval optional, -1 means only save last
     char *outfolder;
-    float wtime, *h, *g, memSize, localerror, globalerror = 1;
-    N = atoi(argv[1]);
-    M = atoi(argv[2]);
-    outfolder=argv[3];
+    float initTemp,wtime, *h, *g, memSize, localerror, globalerror = 1;
+    initTemp=atof(argv[1]);
+    N = atoi(argv[2]);
+    M = atoi(argv[3]);
+    outfolder=argv[4];
     
     
-    if (argc>=5){
-        save_start=atoi(argv[4]);
-        save_end=atoi(argv[5]);
+    if (argc>=6){
+        save_start=atoi(argv[5]);
+        save_end=atoi(argv[6]);
     }
     else
         save_end=-1;
+    if (argc>=8)
+        save_interval=atoi(argv[7]);
+    else
+        save_interval=1;
     MPI_Init(&argc, &argv);
     /*
     if (FTI_Init(argv[2], MPI_COMM_WORLD) !=  0) {
@@ -256,7 +261,7 @@ int main(int argc, char *argv[]) {
    
     h = (float *) malloc(sizeof(float) * nbLines * M);
     g = (float *) malloc(sizeof(float) * nbLines * M);
-    initData(nbProcs,nbLines,M,rank, g);
+    initData(nbProcs,nbLines,M,rank, initTemp,g);
     //initData(nbProcs,nbLines,M,rank, h);
   
     
@@ -283,7 +288,7 @@ int main(int argc, char *argv[]) {
         //int checkpointed = FTI_Snapshot();
         localerror = doWork(nbProcs, rank, nbLines, M, g, h);
         //printf("%f\n",g[900]);
-        if ( i<=save_end&&i>=save_start ) {
+        if ( i<=save_end&&i>=save_start && i%save_interval==0 ) {
             //MPI_Request sreq,rreq[100];
             MPI_Status st;
             

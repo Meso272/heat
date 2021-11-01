@@ -32,7 +32,7 @@ char filename[100];              /* File name of output file */
 int M = 200;                     /* Number of rows */
 int N = 200;                     /* Number of cols */
 long max_its = 10000;           /* Maximum iterations */
-double final_diff;               /* Temperature difference between iterations at the end */
+float final_diff;               /* Temperature difference between iterations at the end */
 
 /* Interactive mode is solely for demonstration purpose on gnuplot */
 #ifdef INTERACTIVE
@@ -41,16 +41,16 @@ int refresh_its = 1000;          /* Overwrite output file per this batch of iter
 
 int main (int argc, char *argv[])
 {
-   double** u;                   /* Previous temperatures */
-   double** w;                   /* New temperatures */
+   float** u;                   /* Previous temperatures */
+   float** w;                   /* New temperatures */
    int      its;                 /* Iterations to converge */
    double   elapsed;             /* Execution time */
    struct timeval stime, etime;  /* Start and end times */
    
-   void allocate_2d_array (int, int, double ***);
-   void initialize_array (double ***);
-   void print_solution (char *, double **);
-   int  find_steady_state (double **, double **);
+   void allocate_2d_array (int, int, float ***);
+   void initialize_array (float ***);
+   void print_solution (char *, float **);
+   int  find_steady_state (float **, float **);
    
    /* For convenience of other problem size testing */
    if (argc > 1) {
@@ -91,10 +91,10 @@ int main (int argc, char *argv[])
    printf("Converged after %d iterations with error: %8.8f.\n", its, final_diff);
    printf("Elapsed time = %8.6f sec.\n", elapsed);
    //print_solution (filename, w);
-   double * result=(double *)malloc(M*N*sizeof(double));
+   float * result=(float *)malloc(M*N*sizeof(float));
    ConvertDoubleArray_2Dto1D(w,result,M,N);
    int status=-1;
-   writeDoubleData_inBytes(result, M*N, filename, &status);
+   writeFloatData_inBytes(result, M*N, filename, &status);
    free(result);
    int i;
    /*
@@ -109,18 +109,18 @@ int main (int argc, char *argv[])
 }
 
 /* Allocate two-dimensional array. */
-void allocate_2d_array (int r, int c, double ***a)
+void allocate_2d_array (int r, int c, float ***a)
 {
-   double *storage;
+   float *storage;
    int     i;
-   storage = (double *) malloc (r * c * sizeof(double));
-   *a = (double **) malloc (r * sizeof(double *));
+   storage = (float *) malloc (r * c * sizeof(float));
+   *a = (float **) malloc (r * sizeof(float *));
    for (i = 0; i < r; i++)
       (*a)[i] = &storage[i * c];
 }
 
 /* Set initial and boundary conditions */
-void initialize_array (double ***u)
+void initialize_array (float ***u)
 {
    int i, j;
    
@@ -139,7 +139,7 @@ void initialize_array (double ***u)
 }
 
 /* Print solution to standard output or a file */
-void print_solution (char *filename, double **u)
+void print_solution (char *filename, float **u)
 {
    int i, j;
    char sep;
@@ -178,9 +178,9 @@ void print_solution (char *filename, double **u)
 #endif
 }
 
-int find_steady_state (double **u, double **w)
+int find_steady_state (float **u, float **w)
 {
-   double diff;            /* Maximum temperature difference */
+   float diff;            /* Maximum temperature difference */
    int    its;             /* Iteration count */
    int    i, j;
 #ifdef INTERACTIVE
@@ -289,7 +289,7 @@ void writeFloatData_inBytes(float *data, size_t nbEle, char* tgtFilePath, int *s
   free(bytes);
   *status = state;
 }
-void ConvertDoubleArray_2Dto1D(double **Array_2D,double * Array_1D, size_t M,size_t N){
+void ConvertDoubleArray_2Dto1D(float **Array_2D,float * Array_1D, size_t M,size_t N){
    int i,j;
    for(i=0;i<M;i++){
       for(j=0;j<N;j++){
