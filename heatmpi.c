@@ -13,6 +13,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include <mpi.h>
+#include <time.h>
 //#include <fti.h>
 
 
@@ -93,7 +94,7 @@ void writeFloatData_inBytes(float *data, size_t nbEle, char* tgtFilePath, int *s
     free(bytes);
     *status = state;
 }
-void initData(int nbProcs,int nbLines, int M, int rank, int initTemp,float *h) {
+void initData(int nbProcs,int nbLines, int M, int rank, float initTemp,int rand,float *h) {
     
     int i, j;
     for (i = 0; i < nbLines; i++) {
@@ -102,8 +103,15 @@ void initData(int nbProcs,int nbLines, int M, int rank, int initTemp,float *h) {
                 h[(i*M)+j] = 0.0;
             else if(j==0)
                 h[(i*M)+j] = initTemp;
-            else
-                h[(i*M)+j] = 25.0;
+            else{
+                if(rand){
+                    srand((int)time(0));
+                    h[(i*M)+j]=( ((float)(rand()%10000))/10000.0 ) *initTemp;
+                }
+
+                else
+                    h[(i*M)+j] = 25.0;
+            }
             
 
         }
@@ -208,7 +216,7 @@ float doWork(int numprocs, int rank, int nbLines, int M, float *g,
 
 
 int main(int argc, char *argv[]) {
-    int rank, nbProcs, N, i, M, save_start,save_end,save_interval;//save_interval optional, -1 means only save last
+    int rank, nbProcs, N, i, M, save_start,save_end,save_interval,random;//save_interval optional, -1 means only save last
     char *outfolder;
     float initTemp,wtime, *h, *g, memSize, localerror, globalerror = 1;
     initTemp=atof(argv[1]);
@@ -227,6 +235,10 @@ int main(int argc, char *argv[]) {
         save_interval=atoi(argv[7]);
     else
         save_interval=1;
+    if (argc>=9)
+        random=atoi(argv[8]);
+    else
+        random=0;
     MPI_Init(&argc, &argv);
     /*
     if (FTI_Init(argv[2], MPI_COMM_WORLD) !=  0) {
@@ -261,7 +273,7 @@ int main(int argc, char *argv[]) {
    
     h = (float *) malloc(sizeof(float) * nbLines * M);
     g = (float *) malloc(sizeof(float) * nbLines * M);
-    initData(nbProcs,nbLines,M,rank, initTemp,g);
+    initData(nbProcs,nbLines,M,rank, initTemp,random,g);
     //initData(nbProcs,nbLines,M,rank, h);
   
     
