@@ -105,7 +105,10 @@ void initData(int nbProcs,int nbLines, int M, int rank, float initTemp,int rando
                 h[(i*M)+j] = initTemp;
             else{
                 if(random){
-                    srand((int)time(0));
+                    struct timeval time;
+                    gettimeofday(&time,NULL);
+                    uint32_t seed=time.tv_sec*1000000+time.tv_usec;
+                    srand(seed);
                     h[(i*M)+j]=( ((float)(rand()%10000))/10000.0 ) *initTemp;
                 }
 
