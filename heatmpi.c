@@ -94,7 +94,7 @@ void writeFloatData_inBytes(float *data, size_t nbEle, char* tgtFilePath, int *s
     free(bytes);
     *status = state;
 }
-void initData(int nbProcs,int nbLines, int M, int rank, float initTemp,int rand,float *h) {
+void initData(int nbProcs,int nbLines, int M, int rank, float initTemp,int random,float *h) {
     
     int i, j;
     for (i = 0; i < nbLines; i++) {
@@ -104,7 +104,7 @@ void initData(int nbProcs,int nbLines, int M, int rank, float initTemp,int rand,
             else if(j==0)
                 h[(i*M)+j] = initTemp;
             else{
-                if(rand){
+                if(random){
                     srand((int)time(0));
                     h[(i*M)+j]=( ((float)(rand()%10000))/10000.0 ) *initTemp;
                 }
